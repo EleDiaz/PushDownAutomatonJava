@@ -10,10 +10,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
@@ -24,7 +24,12 @@ public class PushDown {
     /**
      * Transitions, correspond to sigma element in the definition of Push Down Automaton
      */
-    private HashMap<Input, Output> transitions;
+    private HashMap<Input, Vector<Output>> transitions;
+
+    /**
+     * Current set of states
+     */
+    private BitSet states = new BitSet();
 
     /**
      * Initial state to run transitions
@@ -33,7 +38,8 @@ public class PushDown {
     /**
      * Initial Stack Item
      */
-    private String initialStackItem;
+    private Character initialStackItem;
+
     /**
      * A set of end states, to determine if that string belong to language
      */
@@ -42,12 +48,12 @@ public class PushDown {
     /**
      * Tape Alphabet
      */
-    private Set<String> tapeAlphabet;
+    private Set<Character> tapeAlphabet;
 
     /**
      * Stack alphabet
      */
-    private Set<String> stackAlphabet;
+    private Set<Character> stackAlphabet;
 
     /**
      * Auxiliary class, It could be more easy if there are t-uples in java
@@ -55,8 +61,11 @@ public class PushDown {
      */
     private class Input {
         public int state;
-        public Character tapeItem;
+        public Optional<Character> tapeItem;
         public Character stackItem;
+        public Input(int st, Optional<Character> tI, Character sI) {
+            state = st; tapeItem = tI; stackItem = sI;
+        }
     }
 
     /**
@@ -64,9 +73,11 @@ public class PushDown {
      */
     private class Output {
         public int state;
-        public Vector<Character> stackItems;
+        public String stackItems;
+        public Output(int st, String sIs) {
+            state = st; stackItems = sIs;
+        }
     }
-
 
     /**
      * Initialize from string a push down automaton
@@ -88,6 +99,64 @@ public class PushDown {
             // takeOne :: Line -> (Line -> IO)-> IO throw;
             BiFunction<Stream<String>, Consumer<Stream<String>>, Optional<String>> takeOne = (stream, func) ->
                 stream.limit(1).findAny().map((str) -> { func.accept(Arrays.stream(str.split(" "))); return str; });
+            /*
+            let re = Regex::new(r"(?x)
+            (?P<states>      ((\d+\ *)+)
+            (?:\ *(#.+)?)\n
+                    (?P<t_alphabet>  (\.\ *)+)  # Tape Alphabet
+            (?:\ *(#.+)?)\n
+                    (?P<s_alphabet>  (\.\ *)+)  # Stack Alphabet
+            (?:\ *(#.+)?)\n
+                    (?P<i_state>     (\d+))     # Initial State
+            (?:\ *(#.+)?)\n
+                    (?P<i_stack>     (\.))      # Initial State
+            (?:\ *(#.+)?)\n
+                    (?P<e_states>    (\d+\ *)+) # End states
+            (?:\ *(#.+)?)\n
+                    (?P<transitions> (\d+\ + .\ + .\ + \d+\ + \w\ +(?:\ *(#.+)?)\n)*)
+            ").unwrap();
+            */
+
+
+            Pattern p = Pattern.compile(
+                    "(?<states>(\\d+ *)+)"
+                    + "(?: *(#.+)?\\n)"
+                    + "(?<tAlphabet>(. *)+)"
+                    + "(?: *(#.+)?\\n)"
+                    + "(?<sAlphabet>(. *)+)"
+                    + "(?: *(#.+)?\\n)"
+                    + "(?<iState>(\\d+))"
+                    + "(?: *(#.+)?\\n)"
+                    + "(?<iStack>.)"
+                    + "(?: *(#.+)?\\n)"
+                    + "(?<eStates>(\\d+ *)+)"
+                    + "(?: *(#.+)?\\n)"
+                    + "(?<transitions>(\\d+ +. +. +\\d+ + \\w +\\n)*)" // TODO: Comments in transition no its easily possible
+            );
+            Matcher matcher = p.matcher(new String(Files.readAllBytes(Paths.get(path))));
+
+            Arrays.stream(matcher.group("states").split(" ")).forEach((state) -> getStates().set(Integer.parseInt(state)));
+            Arrays.stream(matcher.group("tAlphabet").split(" ")).forEach((letter) -> getTapeAlphabet().add(letter.charAt(0)));
+            Arrays.stream(matcher.group("sAlphabet").split(" ")).forEach((letter) -> getStackAlphabet().add(letter.charAt(0)));
+            setInitialState(Integer.parseInt(matcher.group("iState")));
+            setInitialStackItem(matcher.group("iStack").charAt(0));
+            Arrays.stream(matcher.group("eStates").split(" ")).forEach((state) -> getEndStates().set(Integer.parseInt(state))); // TODO: Checkear que esta contenido en states
+            Arrays.stream(matcher.group("transitions").split("\n")).forEach((transition) -> {
+                String[] args = transition.split(" ");
+                Input input = new Input(Integer.parseInt(args[0]), Optional.of(args[1].charAt(0)), args[2].charAt(0));
+                Output output = new Output(Integer.parseInt(args[3]), args[4]);
+                Vector<Output> outputs = getTransitions().get(input);
+                if (outputs == null) { // TODO: Cases of empty string, not counted I imagined a special character
+                    outputs.add(output);
+                }
+                else {
+                    Vector<Output> newVec = new Vector<Output>();
+                    newVec.add(output);
+                    getTransitions().put(input, newVec);
+                }
+            });
+
+            /*
 
             // TODO: Improve this parser with idea
             Stream<String> stream = Files.lines(Paths.get(path));
@@ -125,42 +194,24 @@ public class PushDown {
             stream.map((line) -> {
 
             })
-
+            */
         }
         catch (IOException a) {
 
         }
     }
 
-    /**
-     *
-     */
-    public HashMap<Input, Output> getTransitions() {
-        return transitions;
+    public boolean checkString(String text) {
+        // TODO: Implement
+        return false;
     }
 
-    public PushDown setTransitions(HashMap<Input, Output> transitions) {
-        this.transitions = transitions;
-        return this;
-    }
 
-    /**
-     *
-     */
-    public int getInitialState() {
-        return initialState;
-    }
+    //// Getters and Setters
 
     public PushDown setInitialState(int initialState) {
         this.initialState = initialState;
         return this;
-    }
-
-    /**
-     *
-     */
-    public Character getInitialStackItem() {
-        return initialStackItem;
     }
 
     public PushDown setInitialStackItem(Character initialStackItem) {
@@ -171,38 +222,49 @@ public class PushDown {
     /**
      *
      */
+    public BitSet getStates() {
+        return states;
+    }
+
+    /**
+     *
+     */
+    public HashMap<Input, Vector<Output>> getTransitions() {
+        return transitions;
+    }
+
+    /**
+     *
+     */
+    public int getInitialState() {
+        return initialState;
+    }
+
+    /**
+     *
+     */
+    public Character getInitialStackItem() {
+        return initialStackItem;
+    }
+
+    /**
+     *
+     */
     public BitSet getEndStates() {
         return endStates;
     }
 
-    public PushDown setEndStates(BitSet endStates) {
-        this.endStates = endStates;
-        return this;
-    }
-
     /**
      *
      */
-    public Set<String> getTapeAlphabet() {
+    public Set<Character> getTapeAlphabet() {
         return tapeAlphabet;
     }
 
-    public PushDown setTapeAlphabet(Set<String> tapeAlphabet) {
-        this.tapeAlphabet = tapeAlphabet;
-        return this;
-    }
-
     /**
      *
      */
-    public Set<String> getStackAlphabet() {
+    public Set<Character> getStackAlphabet() {
         return stackAlphabet;
     }
-
-    public PushDown setStackAlphabet(Set<String> stackAlphabet) {
-        this.stackAlphabet = stackAlphabet;
-        return this;
-    }
-
-
 }
