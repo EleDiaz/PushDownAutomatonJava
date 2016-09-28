@@ -4,7 +4,7 @@ apply plugin: 'java'
 task runApp(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
 
-  main = 'ull.automaton.Main'
+  main = 'main.java.Main'
 
   // arguments to pass to the application
   // args 'appArg1'
