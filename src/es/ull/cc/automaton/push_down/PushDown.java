@@ -59,7 +59,7 @@ public class PushDown {
      * Auxiliary class, It could be more easy if there are t-uples in java
      * represent the input of "function" sigma
      */
-    private class Input {
+    public class Input {
         public int state;
         public Optional<Character> tapeItem;
         public Character stackItem;
@@ -71,7 +71,7 @@ public class PushDown {
     /**
      * Represent the output of sigma "function"
      */
-    private class Output {
+    public class Output {
         public int state;
         public String stackItems;
         public Output(int st, String sIs) {
@@ -96,28 +96,6 @@ public class PushDown {
      */
     public PushDown(String path) {
         try {
-            // takeOne :: Line -> (Line -> IO)-> IO throw;
-            BiFunction<Stream<String>, Consumer<Stream<String>>, Optional<String>> takeOne = (stream, func) ->
-                stream.limit(1).findAny().map((str) -> { func.accept(Arrays.stream(str.split(" "))); return str; });
-            /*
-            let re = Regex::new(r"(?x)
-            (?P<states>      ((\d+\ *)+)
-            (?:\ *(#.+)?)\n
-                    (?P<t_alphabet>  (\.\ *)+)  # Tape Alphabet
-            (?:\ *(#.+)?)\n
-                    (?P<s_alphabet>  (\.\ *)+)  # Stack Alphabet
-            (?:\ *(#.+)?)\n
-                    (?P<i_state>     (\d+))     # Initial State
-            (?:\ *(#.+)?)\n
-                    (?P<i_stack>     (\.))      # Initial State
-            (?:\ *(#.+)?)\n
-                    (?P<e_states>    (\d+\ *)+) # End states
-            (?:\ *(#.+)?)\n
-                    (?P<transitions> (\d+\ + .\ + .\ + \d+\ + \w\ +(?:\ *(#.+)?)\n)*)
-            ").unwrap();
-            */
-
-
             Pattern p = Pattern.compile(
                     "(?<states>(\\d+ *)+)"
                     + "(?: *(#.+)?\\n)"
@@ -155,53 +133,39 @@ public class PushDown {
                     getTransitions().put(input, newVec);
                 }
             });
-
-            /*
-
-            // TODO: Improve this parser with idea
-            Stream<String> stream = Files.lines(Paths.get(path));
-            takeOne.apply(stream, (states) -> {
-                states.map(Integer::parseInt)
-                        .forEach((i) -> {}); // TODO: Guardar el conjunto de estados??
-            });
-
-            takeOne.apply(stream, (rawTapeAlphabet) ->
-                    rawTapeAlphabet.forEach((letter) ->
-                            tapeAlphabet.add(letter)))
-                    .orElseThrow(() -> new IOException("Error in tape's alphabet"));
-
-            takeOne.apply(stream, (rawStackAlphabet) ->
-                    rawStackAlphabet.forEach((letter) ->
-                            stackAlphabet.add(letter)))
-                    .orElseThrow(() -> new IOException("Error in stack's alphabet"));
-
-            takeOne.apply(stream, (rawInitialState) ->
-                    rawInitialState.findAny().map((initState) ->
-                        initialState = Integer.parseInt(initState)))
-                    .orElseThrow(() -> new IOException("Error initial state"));
-
-
-            takeOne.apply(stream, (rawInitialStack) ->
-                    rawInitialStack.findAny().map((initState) ->
-                            initialStackItem = initState))
-                    .orElseThrow(() -> new IOException("Error initial stack item"));
-
-            takeOne.apply(stream, (rawEndStates) ->
-                    rawEndStates.forEach((letter) ->
-                            endStates.set(Integer.parseInt(letter))))
-                    .orElseThrow(() -> new IOException("Error end states set"));
-
-            stream.map((line) -> {
-
-            })
-            */
         }
         catch (IOException a) {
 
         }
     }
 
+    /**
+     * Return a vector of transitions.
+     * @param text
+     * @param currentState
+     * @return
+     */
+    public Vector<Transition> makeTransition(int currentState, String text, Vector<Character> stack) {
+        Vector<Transition> transitions = new Vector<Transition>();
+
+        // Pop last element from stack always
+        Character lastStackChar = stack.lastElement();
+        stack.remove(stack.size() - 1);
+
+        // Get transitions consuming a character
+        if (!text.isEmpty()) {
+            Optional.ofNullable(getTransitions().get(new Input(currentState, Optional.of(text.charAt(0)), lastStackChar)))
+                    .ifPresent((output) -> transitions.addAll(Transition.make(output, text.substring(1), stack)));
+        }
+
+        // Without consuming a character
+        Optional.ofNullable(getTransitions().get(new Input(currentState, Optional.empty(), lastStackChar)))
+                .ifPresent((output) -> transitions.addAll(Transition.make(output, text, stack)));
+        return transitions;
+    }
+
     public boolean checkString(String text) {
+
         // TODO: Implement
         return false;
     }
