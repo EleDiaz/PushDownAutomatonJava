@@ -4,17 +4,15 @@
  * Copyright 20XX Eleazar Díaz Delgado. All rights reserved.
  */
 
-package es.ull.cc.automaton.push_down;
+package main.java.push_down;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
+
+import java.util.*;
 
 /**
  * A push down automaton, parametrized to Alphabet of type `A` for input tape, and `Z` type alphabet of stack.

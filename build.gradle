@@ -1,0 +1,21 @@
+apply plugin: 'java'
+
+
+task runApp(type: JavaExec) {
+  classpath = sourceSets.main.runtimeClasspath
+
+  main = 'ull.automaton.Main'
+
+  // arguments to pass to the application
+  // args 'appArg1'
+}
+
+repositories {
+    jcenter()
+}
+
+/* dependencies { */
+/*     compile 'org.slf4j:slf4j-api:1.7.13' */
+
+/*     testCompile 'junit:junit:3.8.2' */
+/* } */

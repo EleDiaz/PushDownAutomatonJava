@@ -4,9 +4,8 @@
  * Copyright 20XX Eleazar Díaz Delgado. All rights reserved.
  */
 
-package es.ull.cc.automaton.push_down;
+package main.java.push_down;
 
-import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
