@@ -1,4 +1,4 @@
-/**
+/*
  * PushDownAutomaton - PushDown.java 23/09/16
  * <p>
  * Copyright 20XX Eleazar Díaz Delgado. All rights reserved.
@@ -22,7 +22,7 @@ public class PushDown {
     /**
      * Transitions, correspond to sigma element in the definition of Push Down Automaton
      */
-    private HashMap<Input, ArrayList<Output>> transitions;
+    private HashMap<Input, ArrayList<Output>> transitions = new HashMap<>();
 
     /**
      * Current set of states
@@ -41,17 +41,17 @@ public class PushDown {
     /**
      * A set of end states, to determine if that string belong to language
      */
-    private BitSet endStates;
+    private BitSet endStates = new BitSet();
 
     /**
      * Tape Alphabet
      */
-    private Set<Character> tapeAlphabet;
+    private HashSet<Character> tapeAlphabet = new HashSet<>();
 
     /**
      * Stack alphabet
      */
-    private Set<Character> stackAlphabet;
+    private HashSet<Character> stackAlphabet = new HashSet<>();
 
     /**
      * Auxiliary class, It could be more easy if there are t-uples in java
@@ -146,7 +146,7 @@ public class PushDown {
                             return outputs_;
                         })
                         .orElseGet(() -> {
-                            ArrayList<Output> newArr = new ArrayList<Output>();
+                            ArrayList<Output> newArr = new ArrayList<>();
                             newArr.add(output);
                             return newArr;
                         });
@@ -155,17 +155,17 @@ public class PushDown {
             });
         }
         catch (IOException a) {
-            System.out.println(a.getStackTrace().toString());
+            System.out.println("ERROR");
         }
     }
 
     /**
      * Return a vector of transitions.
-     * @param transition
-     * @return
+     * @param transition A Transition
+     * @return next transitions from given transition
      */
     public ArrayList<Transition> makeTransitions(Transition transition) {
-        ArrayList<Transition> transitions = new ArrayList<>();
+        ArrayList<Transition> transitionsStack = new ArrayList<>();
 
         // Pop last element from stack always
         Character lastStackChar = transition.popStack();
@@ -177,15 +177,15 @@ public class PushDown {
         if (!tape.isEmpty()) {
             Optional.ofNullable(getTransitions().get(new Input(cState, Optional.of(tape.charAt(0)), lastStackChar)))
                     .ifPresent((output) ->
-                            transitions.addAll(Transition.make(output, tape.substring(1), stack))
+                            transitionsStack.addAll(Transition.make(output, tape.substring(1), stack))
                     );
         }
 
         // Without consuming a character
         Optional.ofNullable(getTransitions().get(new Input(cState, Optional.empty(), lastStackChar)))
-                .ifPresent((output) -> transitions.addAll(Transition.make(output, tape, stack)));
+                .ifPresent((output) -> transitionsStack.addAll(Transition.make(output, tape, stack)));
 
-        return transitions;
+        return transitionsStack;
     }
 
     /**
@@ -194,31 +194,31 @@ public class PushDown {
      * @return
      */
     public boolean checkString(String text) {
-        ArrayList<Transition> transitions = new ArrayList<>();
+        ArrayList<Transition> transitionsStack = new ArrayList<>();
 
-        //// TODO: This is repetition of above. That it's a problem
+        /// / TODO: This is repetition of above. That it's a problem
         if (!text.isEmpty()) {
             Optional.ofNullable(getTransitions().get(new Input(getInitialState(), Optional.of(text.charAt(0)), getInitialStackItem())))
                     .ifPresent((output) ->
-                            transitions.addAll(Transition.make(output, text.substring(1), new ArrayList<>())));
+                            transitionsStack.addAll(Transition.make(output, text.substring(1), new ArrayList<>())));
         }
 
         // Without consuming a character
         Optional.ofNullable(getTransitions().get(new Input(getInitialState(), Optional.empty(), getInitialStackItem())))
                 .ifPresent((output) ->
-                        transitions.addAll(Transition.make(output, text, new ArrayList<>())));
+                        transitionsStack.addAll(Transition.make(output, text, new ArrayList<>())));
 
         boolean belong = false;
 
-        while (!transitions.isEmpty() && !belong) {
-            Transition transition = transitions.get(transitions.size() - 1);
-            transitions.remove(transitions.size() - 1);
+        while (!transitionsStack.isEmpty() && !belong) {
+            Transition transition = transitionsStack.get(transitionsStack.size() - 1);
+            transitionsStack.remove(transitionsStack.size() - 1);
 
             if (belongToLanguage(transition)) {
                 belong = true;
             }
             else {
-                transitions.addAll(makeTransitions(transition));
+                transitionsStack.addAll(makeTransitions(transition));
             }
         }
         return belong;
@@ -232,7 +232,7 @@ public class PushDown {
     private boolean belongToLanguage(Transition transition) {
         return (transition.getTape().isEmpty() && transition.getStack().isEmpty())
                 ||
-                (transition.getTape().isEmpty() && getEndStates().get(transition.getCurrentState()))
+                (transition.getTape().isEmpty() && getEndStates().get(transition.getCurrentState()));
     }
 
     //// Getters and Setters
