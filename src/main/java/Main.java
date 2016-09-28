@@ -5,8 +5,19 @@ import main.java.push_down.PushDown;
 
 // TODO
 public class Main {
+    public static String USAGE = "./push_down file_name    // with definition of automaton";
+
     public static void main(String[] args) {
-        // TODO Take a file by args
-        PushDown pushDown = new PushDown("");
+        ParseCommands commands = new ParseCommands(args, USAGE);
+
+        // TODO: Open file from interactive input of user
+
+        PushDown pushDown = new PushDown(commands.getString());
+
+        // TODO: Add menu
+        // Load
+        // Check
+        // StepByStep
+        // Exit
     }
 }
