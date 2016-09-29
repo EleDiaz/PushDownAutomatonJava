@@ -1,0 +1,10 @@
+1   # Estados q
+a b # tapeAlphabet
+S B # Stack Alphabet
+1   # Initial State
+S   # Initial stack item
+# empty endStates
+1 $ S 1 $
+1 a S 1 SB
+1 a S 1 B
+1 b B 1 $

@@ -14,6 +14,8 @@ public class Main {
 
         PushDown pushDown = new PushDown(commands.getString());
 
+        System.out.println("");
+
         // TODO: Add menu
         // Load
         // Check

@@ -27,12 +27,13 @@ public class PushDown {
     /**
      * Current set of states
      */
-    private BitSet states = new BitSet();
+    private HashSet<String> states = new HashSet<>();
 
     /**
      * Initial state to run transitions
      */
-    private int initialState;
+    private String initialState;
+
     /**
      * Initial Stack Item
      */
@@ -41,7 +42,7 @@ public class PushDown {
     /**
      * A set of end states, to determine if that string belong to language
      */
-    private BitSet endStates = new BitSet();
+    private HashSet<String> endStates = new HashSet<>();
 
     /**
      * Tape Alphabet
@@ -58,10 +59,10 @@ public class PushDown {
      * represent the input of "function" sigma
      */
     public class Input {
-        public int state;
+        public String state;
         public Optional<Character> tapeItem;
         public Character stackItem;
-        public Input(int st, Optional<Character> tI, Character sI) {
+        public Input(String st, Optional<Character> tI, Character sI) {
             state = st; tapeItem = tI; stackItem = sI;
         }
     }
@@ -70,9 +71,9 @@ public class PushDown {
      * Represent the output of sigma "function"
      */
     public class Output {
-        public int state;
+        public String state;
         public String stackItems;
-        public Output(int st, String sIs) {
+        public Output(String st, String sIs) {
             state = st; stackItems = sIs;
         }
     }
@@ -95,19 +96,19 @@ public class PushDown {
     public PushDown(String path) {
         try {
             Pattern p = Pattern.compile(
-                    "(?<states>(\\d+ *)+)"
+                    "(?<states>(\\w +)+)"   // States
                     + "(?: *(#.+)?\\n)"
                     + "(?<tAlphabet>(. *)+)"
                     + "(?: *(#.+)?\\n)"
                     + "(?<sAlphabet>(. *)+)"
                     + "(?: *(#.+)?\\n)"
-                    + "(?<iState>(\\d+))"
+                    + "(?<iState>(\\w))"
                     + "(?: *(#.+)?\\n)"
                     + "(?<iStack>.)"
                     + "(?: *(#.+)?\\n)"
-                    + "(?<eStates>(\\d+ *)+)"
+                    + "(?<eStates>(\\w *)+)"
                     + "(?: *(#.+)?\\n)"
-                    + "(?<transitions>(\\d+ +. +. +\\d+ + \\w +\\n)*)" // TODO: Comments in transition no its easily possible
+                    + "(?<transitions>(\\w +. +. +\\e + \\w +\\n)*)" // TODO: Comments in transition no its easily possible
             );
             Matcher matcher = p.matcher(new String(Files.readAllBytes(Paths.get(path))));
 
@@ -120,7 +121,7 @@ public class PushDown {
             Arrays.stream(matcher.group("sAlphabet").split(" "))
                     .forEach((letter) -> getStackAlphabet().add(letter.charAt(0)));
 
-            setInitialState(Integer.parseInt(matcher.group("iState")));
+            setInitialState(matcher.group("iState"));
 
             setInitialStackItem(matcher.group("iStack").charAt(0));
 
@@ -129,12 +130,12 @@ public class PushDown {
 
             Arrays.stream(matcher.group("transitions").split("\n")).forEach((transition) -> {
                 String[] args = transition.split(" ");
-                int state                   = Integer.parseInt(args[0]);
+                String state                   = args[0];
 
                 // Dollar is the empty language TODO: Should be variable
                 Optional<Character> charOpt = args[1].equals("$") ? Optional.empty() : Optional.of(args[1].charAt(0));
                 Character popStack          = args[2].charAt(0);
-                int toState                 = Integer.parseInt(args[3]);
+                String toState              = Integer.parseInt(args[3]);
                 String pushStack            = args[4];
 
                 Input input = new Input(state, charOpt, popStack);

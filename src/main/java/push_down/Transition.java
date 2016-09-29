@@ -39,8 +39,11 @@ public class Transition {
      * @param stack
      * @return
      */
-    public static Vector<Transition> make(ArrayList<PushDown.Output> outputs, String restInput, ArrayList<Character> stack) {
-        return outputs.stream().map((output) -> new Transition(output, restInput, stack)).collect(Collectors.toCollection(Vector::new));
+    public static Vector<Transition> make(ArrayList<PushDown.Output> outputs
+            , String restInput
+            , ArrayList<Character> stack) {
+        return outputs.stream().map((output) ->
+                new Transition(output, restInput, stack)).collect(Collectors.toCollection(Vector::new));
     }
 
     /**
