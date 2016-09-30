@@ -4,7 +4,7 @@
  * Copyright 20XX Eleazar Díaz Delgado. All rights reserved.
  */
 
-package main.java.push_down;
+package main.java.push_down.model;
 
 import java.util.ArrayList;
 import java.util.Vector;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  *
  */
 public class Transition {
-    private int currentState;
+    private String currentState;
     private String tape;
     private ArrayList<Character> stack;
 
@@ -61,11 +61,11 @@ public class Transition {
     /**
      *
      */
-    public int getCurrentState() {
+    public String getCurrentState() {
         return currentState;
     }
 
-    public Transition setCurrentState(int currentState) {
+    public Transition setCurrentState(String currentState) {
         this.currentState = currentState;
         return this;
     }

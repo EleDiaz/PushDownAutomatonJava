@@ -7,7 +7,7 @@ task runApp(type: JavaExec) {
   main = 'main.java.Main'
 
   // arguments to pass to the application
-  // args 'appArg1'
+  args 'testStackClean.pda'
 }
 
 repositories {

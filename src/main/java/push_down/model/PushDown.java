@@ -4,7 +4,7 @@
  * Copyright 20XX Eleazar Díaz Delgado. All rights reserved.
  */
 
-package main.java.push_down;
+package main.java.push_down.model;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -82,38 +82,44 @@ public class PushDown {
      * Initialize from string a push down automaton
      * Following the next format:
      * # Commentary
-     * q1 q2 q3 … # conjunto Q
-     * a1 a2 a3 … # conjunto Σ
-     * A1 A2 A3 … # conjunto Γ
-     * q1 # estado inicial
-     * A1 # símbolo inicial de la pila
-     * q2 q3 # conjunto F
-     * q1 a1 A1 q2 A2 # función de transición: δ (q1, a1, A1) = (q2, A2)
+     * q1 q2 q3 … # Set Q it could be "q1", "1", "p"
+     * a1 a2 a3 … # Set Σ limit to a char only
+     * A1 A2 A3 … # Set Γ limit to a char only
+     * q1 # Initial State
+     * A1 # Initial state of symbol
+     * q2 q3 # Set F
+     * q1 a1 A1 q2 A2 # Transition function: δ (q1, a1, A1) = (q2, A2)
      *
-     * TODO: THINK I should do a parser for this type of input? It has similar characteristics through problems
      * THINK: ignoreComments commentsParser >>> do PushDown <$> takeSets <*> takeAlphabet <*> ... <*> many transitions
      */
     public PushDown(String path) {
         try {
+
             Pattern p = Pattern.compile(
-                    "(?<states>(\\w +)+)"   // States
-                    + "(?: *(#.+)?\\n)"
-                    + "(?<tAlphabet>(. *)+)"
-                    + "(?: *(#.+)?\\n)"
-                    + "(?<sAlphabet>(. *)+)"
-                    + "(?: *(#.+)?\\n)"
-                    + "(?<iState>(\\w))"
-                    + "(?: *(#.+)?\\n)"
-                    + "(?<iStack>.)"
-                    + "(?: *(#.+)?\\n)"
-                    + "(?<eStates>(\\w *)+)"
-                    + "(?: *(#.+)?\\n)"
-                    + "(?<transitions>(\\w +. +. +\\e + \\w +\\n)*)" // TODO: Comments in transition no its easily possible
+                    "( *(#.+)?\\n)*"
+                    + "(?<states> *\\w+( +\\w+)*)"   // States
+                    + " *(#.+)?\\n"
+                    + "(?<tAlphabet> *\\w( +\\w)*)"
+                    + " *(#.+)?\\n"
+                    + "(?<sAlphabet> *\\w( +\\w)*)"
+                    + " *(#.+)?\\n"
+                    + "(?<iState> *\\w+)"
+                    + " *(#.+)?\\n"
+                    + "(?<iStack> *\\w)"
+                    + " *(#.+)?\\n"
+                    + "(?<eStates>\\w?( *\\w)*)"
+                    + " *(#.+)?\\n"
+                    + "(?<transitions>( *\\w+ +\\w +\\w +\\w+ +[$\\w]+ *\\n)*)" // TODO: Comments in transition no its easily possible
+                    + "[ +\\n]*"
             );
+            System.out.println(new String(Files.readAllBytes(Paths.get(path))));
             Matcher matcher = p.matcher(new String(Files.readAllBytes(Paths.get(path))));
+            if (!matcher.matches()) {
+                 // Bad big fail TODO:
+            }
 
             Arrays.stream(matcher.group("states").split(" "))
-                    .forEach((state) -> getStates().set(Integer.parseInt(state)));
+                    .forEach((state) -> getStates().add(state));
 
             Arrays.stream(matcher.group("tAlphabet").split(" "))
                     .forEach((letter) -> getTapeAlphabet().add(letter.charAt(0)));
@@ -126,7 +132,7 @@ public class PushDown {
             setInitialStackItem(matcher.group("iStack").charAt(0));
 
             Arrays.stream(matcher.group("eStates").split(" "))
-                    .forEach((state) -> getEndStates().set(Integer.parseInt(state))); // TODO: Checkear que esta contenido en states
+                    .forEach((state) -> getEndStates().add(state)); // TODO: Checkear que esta contenido en states
 
             Arrays.stream(matcher.group("transitions").split("\n")).forEach((transition) -> {
                 String[] args = transition.split(" ");
@@ -135,7 +141,7 @@ public class PushDown {
                 // Dollar is the empty language TODO: Should be variable
                 Optional<Character> charOpt = args[1].equals("$") ? Optional.empty() : Optional.of(args[1].charAt(0));
                 Character popStack          = args[2].charAt(0);
-                String toState              = Integer.parseInt(args[3]);
+                String toState              = args[3];
                 String pushStack            = args[4];
 
                 Input input = new Input(state, charOpt, popStack);
@@ -171,7 +177,7 @@ public class PushDown {
         // Pop last element from stack always
         Character lastStackChar = transition.popStack();
         String tape = transition.getTape();
-        int cState  = transition.getCurrentState();
+        String cState  = transition.getCurrentState();
         ArrayList<Character> stack = transition.getStack();
 
         // Get transitions consuming a character
@@ -233,12 +239,12 @@ public class PushDown {
     private boolean belongToLanguage(Transition transition) {
         return (transition.getTape().isEmpty() && transition.getStack().isEmpty())
                 ||
-                (transition.getTape().isEmpty() && getEndStates().get(transition.getCurrentState()));
+                (transition.getTape().isEmpty() && getEndStates().contains(transition.getCurrentState()));
     }
 
     //// Getters and Setters
 
-    public PushDown setInitialState(int initialState) {
+    public PushDown setInitialState(String initialState) {
         this.initialState = initialState;
         return this;
     }
@@ -251,7 +257,7 @@ public class PushDown {
     /**
      *
      */
-    public BitSet getStates() {
+    public HashSet<String> getStates() {
         return states;
     }
 
@@ -265,7 +271,7 @@ public class PushDown {
     /**
      *
      */
-    public int getInitialState() {
+    public String getInitialState() {
         return initialState;
     }
 
@@ -279,7 +285,7 @@ public class PushDown {
     /**
      *
      */
-    public BitSet getEndStates() {
+    public HashSet<String> getEndStates() {
         return endStates;
     }
 

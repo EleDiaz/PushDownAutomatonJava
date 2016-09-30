@@ -1,7 +1,29 @@
 package main.java;
 
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import main.java.push_down.model.PushDown;
 
-import main.java.push_down.PushDown;
+/*
+public class Main extends Application {
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        Parent root = FXMLLoader.load(getClass().getResource("Main.fxml"));
+
+        Scene scene = new Scene(root);
+        primaryStage.setTitle("Hello World!");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+}
+*/
 
 // TODO
 public class Main {
@@ -14,7 +36,7 @@ public class Main {
 
         PushDown pushDown = new PushDown(commands.getString());
 
-        System.out.println("");
+        System.out.println("Tachan");
 
         // TODO: Add menu
         // Load
