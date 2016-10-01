@@ -5,9 +5,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import main.java.push_down.model.PushDown;
 
-/*
+import java.util.Optional;
+
 public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
@@ -23,8 +23,7 @@ public class Main extends Application {
         primaryStage.show();
     }
 }
-*/
-
+/*
 // TODO
 public class Main {
     public static String USAGE = "./push_down file_name    // with definition of automaton";
@@ -45,3 +44,4 @@ public class Main {
         // Exit
     }
 }
+*/

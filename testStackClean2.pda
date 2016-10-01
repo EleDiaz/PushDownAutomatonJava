@@ -1,10 +1,12 @@
-1   # Estados q
+
+  # Esto es un pda por pila
+q   # States
 a b # tapeAlphabet
 S B # Stack Alphabet
-1   # Initial State
+q   # Initial State
 S   # Initial stack item
 # empty endStates
-1 $ S 1 $
-1 a S 1 SB
-1 a S 1 B
-1 b B 1 $
+q $ S q $
+q a S q SB
+q a S q B
+q b B q $

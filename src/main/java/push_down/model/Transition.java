@@ -6,54 +6,27 @@
 
 package main.java.push_down.model;
 
-import java.util.ArrayList;
-import java.util.Vector;
-import java.util.stream.Collectors;
-
 /**
  * A transition, it keeps all information necessary to re-continued trace in case of stop or case of no-determinist
  *
  */
 public class Transition {
     private String currentState;
-    private String tape;
-    private ArrayList<Character> stack;
+    private Tape tape;
+    private Stack stack;
 
-    private Transition(PushDown.Output output, String restInput, ArrayList<Character> stack) {
-        this.stack = stack;
+    public Transition(Transition transition) {
+        currentState = transition.getCurrentState();
+        tape = new Tape(transition.getTape());
+        stack = new Stack(transition.getStack());
+    }
 
-        for (int i = output.stackItems.length() - 1; i >= 0; i--) { // EXPLAIN: I use a vector like stack extracting the last items
-            this.stack.add(output.stackItems.charAt(i));
-        }
+    public Transition(String currState, Tape restInput, Stack lastStack) {
+        stack = lastStack;
 
         tape = restInput;
 
-        currentState = output.state;
-
-    }
-
-    /**
-     *
-     * @param outputs
-     * @param restInput
-     * @param stack
-     * @return
-     */
-    public static Vector<Transition> make(ArrayList<PushDown.Output> outputs
-            , String restInput
-            , ArrayList<Character> stack) {
-        return outputs.stream().map((output) ->
-                new Transition(output, restInput, stack)).collect(Collectors.toCollection(Vector::new));
-    }
-
-    /**
-     *
-     * @return
-     */
-    public Character popStack() {
-        Character lastStackChar = stack.get(stack.size() - 1);
-        stack.remove(stack.size() - 1);
-        return lastStackChar;
+        currentState = currState;
     }
 
     //// Setters and Getters
@@ -73,11 +46,11 @@ public class Transition {
     /**
      *
      */
-    public String getTape() {
+    public Tape getTape() {
         return tape;
     }
 
-    public Transition setTape(String tape) {
+    public Transition setTape(Tape tape) {
         this.tape = tape;
         return this;
     }
@@ -85,13 +58,8 @@ public class Transition {
     /**
      *
      */
-    public ArrayList<Character> getStack() {
+    public Stack getStack() {
         return stack;
-    }
-
-    public Transition setStack(ArrayList<Character> stack) {
-        this.stack = stack;
-        return this;
     }
 
 }

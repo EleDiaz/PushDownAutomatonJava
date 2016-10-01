@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A push down automaton, parametrized to Alphabet of type `A` for input tape, and `Z` type alphabet of stack.
@@ -22,7 +23,7 @@ public class PushDown {
     /**
      * Transitions, correspond to sigma element in the definition of Push Down Automaton
      */
-    private HashMap<Input, ArrayList<Output>> transitions = new HashMap<>();
+    private FuncTransition transitions = new FuncTransition();
 
     /**
      * Current set of states
@@ -55,30 +56,6 @@ public class PushDown {
     private HashSet<Character> stackAlphabet = new HashSet<>();
 
     /**
-     * Auxiliary class, It could be more easy if there are t-uples in java
-     * represent the input of "function" sigma
-     */
-    public class Input {
-        public String state;
-        public Optional<Character> tapeItem;
-        public Character stackItem;
-        public Input(String st, Optional<Character> tI, Character sI) {
-            state = st; tapeItem = tI; stackItem = sI;
-        }
-    }
-
-    /**
-     * Represent the output of sigma "function"
-     */
-    public class Output {
-        public String state;
-        public String stackItems;
-        public Output(String st, String sIs) {
-            state = st; stackItems = sIs;
-        }
-    }
-
-    /**
      * Initialize from string a push down automaton
      * Following the next format:
      * # Commentary
@@ -92,78 +69,57 @@ public class PushDown {
      *
      * THINK: ignoreComments commentsParser >>> do PushDown <$> takeSets <*> takeAlphabet <*> ... <*> many transitions
      */
-    public PushDown(String path) {
-        try {
-
-            Pattern p = Pattern.compile(
-                    "( *(#.+)?\\n)*"
-                    + "(?<states> *\\w+( +\\w+)*)"   // States
-                    + " *(#.+)?\\n"
-                    + "(?<tAlphabet> *\\w( +\\w)*)"
-                    + " *(#.+)?\\n"
-                    + "(?<sAlphabet> *\\w( +\\w)*)"
-                    + " *(#.+)?\\n"
-                    + "(?<iState> *\\w+)"
-                    + " *(#.+)?\\n"
-                    + "(?<iStack> *\\w)"
-                    + " *(#.+)?\\n"
-                    + "(?<eStates>\\w?( *\\w)*)"
-                    + " *(#.+)?\\n"
-                    + "(?<transitions>( *\\w+ +\\w +\\w +\\w+ +[$\\w]+ *\\n)*)" // TODO: Comments in transition no its easily possible
-                    + "[ +\\n]*"
-            );
-            System.out.println(new String(Files.readAllBytes(Paths.get(path))));
-            Matcher matcher = p.matcher(new String(Files.readAllBytes(Paths.get(path))));
-            if (!matcher.matches()) {
-                 // Bad big fail TODO:
-            }
-
-            Arrays.stream(matcher.group("states").split(" "))
-                    .forEach((state) -> getStates().add(state));
-
-            Arrays.stream(matcher.group("tAlphabet").split(" "))
-                    .forEach((letter) -> getTapeAlphabet().add(letter.charAt(0)));
-
-            Arrays.stream(matcher.group("sAlphabet").split(" "))
-                    .forEach((letter) -> getStackAlphabet().add(letter.charAt(0)));
-
-            setInitialState(matcher.group("iState"));
-
-            setInitialStackItem(matcher.group("iStack").charAt(0));
-
-            Arrays.stream(matcher.group("eStates").split(" "))
-                    .forEach((state) -> getEndStates().add(state)); // TODO: Checkear que esta contenido en states
-
-            Arrays.stream(matcher.group("transitions").split("\n")).forEach((transition) -> {
-                String[] args = transition.split(" ");
-                String state                   = args[0];
-
-                // Dollar is the empty language TODO: Should be variable
-                Optional<Character> charOpt = args[1].equals("$") ? Optional.empty() : Optional.of(args[1].charAt(0));
-                Character popStack          = args[2].charAt(0);
-                String toState              = args[3];
-                String pushStack            = args[4];
-
-                Input input = new Input(state, charOpt, popStack);
-                Output output = new Output(toState, pushStack);
-
-                ArrayList<Output> outputs = Optional.ofNullable(getTransitions().get(input))
-                        .map((outputs_) -> {
-                            outputs_.add(output);
-                            return outputs_;
-                        })
-                        .orElseGet(() -> {
-                            ArrayList<Output> newArr = new ArrayList<>();
-                            newArr.add(output);
-                            return newArr;
-                        });
-
-                getTransitions().put(input, outputs);
-            });
+    public PushDown(String path) throws Exception {
+        Pattern p = Pattern.compile(
+                "( *(#.+)?\\n)*"
+                + "(?<states> *\\w+( +\\w+)*)"   // States
+                + " *(#.+)?\\n"
+                + "(?<tAlphabet> *\\w( +\\w)*)"
+                + " *(#.+)?\\n"
+                + "(?<sAlphabet> *\\w( +\\w)*)"
+                + " *(#.+)?\\n"
+                + "(?<iState> *\\w+)"
+                + " *(#.+)?\\n"
+                + "(?<iStack> *\\w)"
+                + " *(#.+)?\\n"
+                + "(?<eStates>\\w?( *\\w)*)"
+                + " *(#.+)?\\n"
+                + "(?<transitions>( *\\w+ +[$\\w] +\\w +\\w+ +[$\\w]+ *\\n)*)" // TODO: Comments in transition no its easily possible
+                + "[ +\\n]*"
+        );
+        Matcher matcher = p.matcher(new String(Files.readAllBytes(Paths.get(path))));
+        if (!matcher.matches()) {
+            throw new Exception("Fail to parse file. See the format specified");
         }
-        catch (IOException a) {
-            System.out.println("ERROR");
-        }
+
+        Arrays.stream(matcher.group("states").split(" "))
+                .forEach((state) -> getStates().add(state));
+
+        Arrays.stream(matcher.group("tAlphabet").split(" "))
+                .forEach((letter) -> getTapeAlphabet().add(letter.charAt(0)));
+
+        Arrays.stream(matcher.group("sAlphabet").split(" "))
+                .forEach((letter) -> getStackAlphabet().add(letter.charAt(0)));
+
+        setInitialState(matcher.group("iState"));
+
+        setInitialStackItem(matcher.group("iStack").charAt(0));
+
+        Arrays.stream(matcher.group("eStates").split(" "))
+                .forEach((state) -> getEndStates().add(state)); // TODO: Checkear que esta contenido en states
+
+        Arrays.stream(matcher.group("transitions").split("\n")).forEach((transition) -> {
+            String[] args = transition.split(" ");
+            String state                   = args[0];
+
+            // Dollar is the empty language TODO: Should be variable
+            Optional<Character> charOpt = args[1].equals("$") ? Optional.empty() : Optional.of(args[1].charAt(0));
+            Character popStack          = args[2].charAt(0);
+            String toState              = args[3];
+            String pushStack            = args[4].equals("$") ? "" : args[4];
+
+            getTransitions().add(state, charOpt, popStack, toState, pushStack);
+        });
     }
 
     /**
@@ -171,27 +127,43 @@ public class PushDown {
      * @param transition A Transition
      * @return next transitions from given transition
      */
-    public ArrayList<Transition> makeTransitions(Transition transition) {
+    public ArrayList<Transition> epsilonTransitions(Transition transition) throws Exception {
         ArrayList<Transition> transitionsStack = new ArrayList<>();
 
-        // Pop last element from stack always
-        Character lastStackChar = transition.popStack();
-        String tape = transition.getTape();
-        String cState  = transition.getCurrentState();
-        ArrayList<Character> stack = transition.getStack();
+        Character topCharStack = transition.getStack().pop().orElseThrow(() -> new Exception("Empty stack to early"));
 
-        // Get transitions consuming a character
-        if (!tape.isEmpty()) {
-            Optional.ofNullable(getTransitions().get(new Input(cState, Optional.of(tape.charAt(0)), lastStackChar)))
-                    .ifPresent((output) ->
-                            transitionsStack.addAll(Transition.make(output, tape.substring(1), stack))
-                    );
-        }
+        Optional.ofNullable(getTransitions().apply(transition.getCurrentState(), topCharStack))
+                .ifPresent((outputs) ->
+                    transitionsStack.addAll(outputs.stream()
+                        .map((output) -> {
+                            Stack stack = new Stack(transition.getStack()).push(output.stackItems);
+                            return new Transition(output.state, transition.getTape(), stack);
+                        })
+                        .collect(Collectors.toCollection(ArrayList::new))));
 
-        // Without consuming a character
-        Optional.ofNullable(getTransitions().get(new Input(cState, Optional.empty(), lastStackChar)))
-                .ifPresent((output) -> transitionsStack.addAll(Transition.make(output, tape, stack)));
+        return transitionsStack;
+    }
 
+    /**
+     * TODO:
+     * @param transition
+     * @return
+     * @throws Exception
+     */
+    public ArrayList<Transition> nonEpsilonTransitions(Transition transition) throws Exception {
+        ArrayList<Transition> transitionsStack = new ArrayList<>();
+
+        Character topCharStack = transition.getStack().pop().orElseThrow(() -> new Exception("Empty stack to early"));
+
+        transition.getTape().take().ifPresent((character) ->
+            Optional.ofNullable(getTransitions().apply(transition.getCurrentState(), character, topCharStack))
+                .ifPresent((outputs) ->
+                    transitionsStack.addAll(outputs.stream()
+                        .map((output) -> {
+                            Stack stack = new Stack(transition.getStack().push(output.stackItems));
+                            return new Transition(output.state, transition.getTape(), stack);
+                        })
+                        .collect(Collectors.toCollection(ArrayList::new)))));
         return transitionsStack;
     }
 
@@ -200,20 +172,10 @@ public class PushDown {
      * @param text
      * @return
      */
-    public boolean checkString(String text) {
+    public boolean checkString(String text) throws Exception {
         ArrayList<Transition> transitionsStack = new ArrayList<>();
 
-        /// / TODO: This is repetition of above. That it's a problem
-        if (!text.isEmpty()) {
-            Optional.ofNullable(getTransitions().get(new Input(getInitialState(), Optional.of(text.charAt(0)), getInitialStackItem())))
-                    .ifPresent((output) ->
-                            transitionsStack.addAll(Transition.make(output, text.substring(1), new ArrayList<>())));
-        }
-
-        // Without consuming a character
-        Optional.ofNullable(getTransitions().get(new Input(getInitialState(), Optional.empty(), getInitialStackItem())))
-                .ifPresent((output) ->
-                        transitionsStack.addAll(Transition.make(output, text, new ArrayList<>())));
+        transitionsStack.add(new Transition(getInitialState(), new Tape(text), new Stack(getInitialStackItem())));
 
         boolean belong = false;
 
@@ -224,8 +186,9 @@ public class PushDown {
             if (belongToLanguage(transition)) {
                 belong = true;
             }
-            else {
-                transitionsStack.addAll(makeTransitions(transition));
+            else if (!transition.getStack().isEmpty()) {
+                transitionsStack.addAll(epsilonTransitions(new Transition(transition)));
+                transitionsStack.addAll(nonEpsilonTransitions(new Transition(transition)));
             }
         }
         return belong;
@@ -264,7 +227,7 @@ public class PushDown {
     /**
      *
      */
-    public HashMap<Input, ArrayList<Output>> getTransitions() {
+    public FuncTransition getTransitions() {
         return transitions;
     }
 
