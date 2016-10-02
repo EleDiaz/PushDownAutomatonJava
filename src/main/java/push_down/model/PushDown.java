@@ -93,20 +93,20 @@ public class PushDown {
         }
 
         Arrays.stream(matcher.group("states").split(" "))
-                .forEach((state) -> getStates().add(state));
+                .forEach(state -> getStates().add(state));
 
         Arrays.stream(matcher.group("tAlphabet").split(" "))
-                .forEach((letter) -> getTapeAlphabet().add(letter.charAt(0)));
+                .forEach(letter -> getTapeAlphabet().add(letter.charAt(0)));
 
         Arrays.stream(matcher.group("sAlphabet").split(" "))
-                .forEach((letter) -> getStackAlphabet().add(letter.charAt(0)));
+                .forEach(letter -> getStackAlphabet().add(letter.charAt(0)));
 
         setInitialState(matcher.group("iState"));
 
         setInitialStackItem(matcher.group("iStack").charAt(0));
 
         Arrays.stream(matcher.group("eStates").split(" "))
-                .forEach((state) -> getEndStates().add(state)); // TODO: Checkear que esta contenido en states
+                .forEach(state -> getEndStates().add(state)); // TODO: Checkear que esta contenido en states
 
         Arrays.stream(matcher.group("transitions").split("\n")).forEach((transition) -> {
             String[] args = transition.split(" ");
@@ -132,11 +132,11 @@ public class PushDown {
         Character topCharStack = transitionState.getStack().pop().orElseThrow(() -> new Exception("Empty stack to early"));
 
         Optional.ofNullable(getTransitions().apply(transitionState.getCurrentState(), topCharStack))
-                .ifPresent((outputs) ->
+                .ifPresent(outputs ->
                     transitionsStack.addAll(outputs.stream()
-                        .map((output) -> {
+                        .map(output -> {
                             Stack stack = new Stack(transitionState.getStack()).push(output.stackItems);
-                            return new TransitionState(output.state, transitionState.getTape(), stack);
+                            return new TransitionState(output.state, transitionState.getTape(), stack, output.numTransition);
                         })
                         .collect(Collectors.toCollection(ArrayList::new))));
 
@@ -156,11 +156,11 @@ public class PushDown {
 
         transitionState.getTape().take().ifPresent((character) ->
             Optional.ofNullable(getTransitions().apply(transitionState.getCurrentState(), character, topCharStack))
-                .ifPresent((outputs) ->
+                .ifPresent(outputs ->
                     transitionsStack.addAll(outputs.stream()
-                        .map((output) -> {
+                        .map(output -> {
                             Stack stack = new Stack(transitionState.getStack().push(output.stackItems));
-                            return new TransitionState(output.state, transitionState.getTape(), stack);
+                            return new TransitionState(output.state, transitionState.getTape(), stack, output.numTransition);
                         })
                         .collect(Collectors.toCollection(ArrayList::new)))));
         return transitionsStack;
@@ -171,8 +171,9 @@ public class PushDown {
      * @param text
      * @return
      */
-    public boolean checkString(String text) throws Exception {
+    public boolean checkString(String text, ArrayList<Breadcrumb> breadcrumbs) throws Exception {
         ArrayList<TransitionState> transitionsStack = new ArrayList<>();
+        int countTransitions = 0;
 
         transitionsStack.add(new TransitionState(getInitialState(), new Tape(text), new Stack(getInitialStackItem())));
 
@@ -184,10 +185,22 @@ public class PushDown {
 
             if (belongToLanguage(transitionState)) {
                 belong = true;
+                breadcrumbs.add(new Breadcrumb(transitionState, new BitSet(), countTransitions++, 0));
             }
             else if (!transitionState.getStack().isEmpty()) {
-                transitionsStack.addAll(epsilonTransitions(new TransitionState(transitionState)));
-                transitionsStack.addAll(nonEpsilonTransitions(new TransitionState(transitionState)));
+                ArrayList<TransitionState> aux = new ArrayList<>();
+                aux.addAll(epsilonTransitions(new TransitionState(transitionState)));
+                aux.addAll(nonEpsilonTransitions(new TransitionState(transitionState)));
+
+                BitSet actions = new BitSet();
+                aux.forEach(transition -> actions.set(transition.getIdTransition().get()));
+                breadcrumbs.add(new Breadcrumb(
+                      transitionState
+                    , actions
+                    , countTransitions++
+                    , 0));
+
+                transitionsStack.addAll(aux);
             }
         }
         return belong;

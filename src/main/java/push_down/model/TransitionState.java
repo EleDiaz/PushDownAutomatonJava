@@ -6,11 +6,18 @@
 
 package main.java.push_down.model;
 
+import java.util.Optional;
+
 /**
  * A transition, it keeps all information necessary to re-continued trace in case of stop or case of non-determinist
  *
  */
 public class TransitionState {
+
+    /**
+     * Transition number
+     */
+    private Optional<Integer> idTransition = Optional.empty();
 
     /**
      * Current state in this transition
@@ -41,12 +48,19 @@ public class TransitionState {
      */
     public TransitionState(String currState, Tape restInput, Stack lastStack) {
         stack = lastStack;
-
         tape = restInput;
-
         currentState = currState;
     }
 
+    /**
+     * Make a transition, its no carry out sigma transition only saves information to continue in a near future
+     */
+    public TransitionState(String currState, Tape restInput, Stack lastStack, int idT) {
+        stack = lastStack;
+        tape = restInput;
+        currentState = currState;
+        idTransition = Optional.of(idT);
+    }
     //// Setters and Getters
 
     /**
@@ -80,4 +94,16 @@ public class TransitionState {
         return stack;
     }
 
+
+    /**
+     *
+     */
+    public Optional<Integer> getIdTransition() {
+        return idTransition;
+    }
+
+    public TransitionState setIdTransition(Optional<Integer> idTransition) {
+        this.idTransition = idTransition;
+        return this;
+    }
 }

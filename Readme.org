@@ -1,0 +1,16 @@
+* Push down Automaton
+
+** Brief
+
+TODO:
+
+** Internal structure overview
+
+TODO:
+
+** User Requirements
+- Java 8 with javafx (ubuntu distributions need install openjfx)
+
+** Develop Requirements
+- User requirements
+- Gradle tool to build

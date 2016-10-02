@@ -11,11 +11,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
+import main.java.push_down.model.Breadcrumb;
 import main.java.push_down.model.PushDown;
 import main.java.push_down.model.RawSigmaTransition;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.ResourceBundle;
 
@@ -45,8 +47,8 @@ public class Controller implements Initializable {
     @FXML //  fx:id="transitionsTable"
     private TableView<RawSigmaTransition> transitionsTable;
 
-    @FXML //  fx:id="transitionColumn"
-    private TableColumn<RawSigmaTransition, Integer> transitionColumn;
+    @FXML //  fx:id="traceTable"
+    private TableView<Breadcrumb> traceTable;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -100,8 +102,10 @@ public class Controller implements Initializable {
     public void onCheckString() {
 
         try {
-            boolean test = pushDown.checkString(tapeInput.getText());
+            ArrayList<Breadcrumb> trace = new ArrayList<>();
+            boolean test = pushDown.checkString(tapeInput.getText(), trace);
             infoLabel.setText(test? "Input belong to language" : "Not belong");
+            traceTable.setItems(FXCollections.observableArrayList(trace));
         } catch (Exception e) {
             e.printStackTrace();
         }
