@@ -6,7 +6,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.util.Optional;
 
 public class Main extends Application {
     public static void main(String[] args) {
@@ -15,10 +14,10 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("Main.fxml"));
+        Parent root = FXMLLoader.load(ClassLoader.getSystemClassLoader().getResource("Main.fxml"));
 
         Scene scene = new Scene(root);
-        primaryStage.setTitle("Hello World!");
+        primaryStage.setTitle("PushDown Automaton");
         primaryStage.setScene(scene);
         primaryStage.show();
     }

@@ -6,14 +6,17 @@
 
 package main.java.push_down.controller;
 
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import main.java.push_down.model.PushDown;
+import main.java.push_down.model.RawSigmaTransition;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.ResourceBundle;
 
 /**
@@ -39,12 +42,26 @@ public class Controller implements Initializable {
     @FXML //  fx:id="infoLabel"
     private Label infoLabel;
 
+    @FXML //  fx:id="transitionsTable"
+    private TableView<RawSigmaTransition> transitionsTable;
+
+    @FXML //  fx:id="transitionColumn"
+    private TableColumn<RawSigmaTransition, Integer> transitionColumn;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert checkString != null : "fx:id=\"checkString\" was not injected: check your FXML file 'Main.fxml'.";
         assert step != null : "fx:id=\"step\" was not injected: check your FXML file 'Main.fxml'.";
         assert reset != null : "fx:id=\"reset\" was not injected: check your FXML file 'Main.fxml'.";
         assert tapeInput != null : "fx:id=\"tapeInput\" was not injected: check your FXML file 'Main.fxml'.";
+        assert transitionsTable != null : "fx:id=\"transitionTable\" was not injected: check your FXML file 'Main.fxml'.";
+
+        transitionsTable.sortPolicyProperty().set(t -> {
+            Comparator<RawSigmaTransition> comparator = (r1, r2) ->
+                new Integer(r1.getNumTransition()).compareTo(r2.getNumTransition());
+            FXCollections.sort(t.getItems(), comparator);
+            return true;
+        });
     }
 
 
@@ -75,6 +92,8 @@ public class Controller implements Initializable {
                 dialog.setContentText(e.getMessage());
                 dialog.showAndWait();
             }
+            transitionsTable.setItems(FXCollections.observableArrayList(RawSigmaTransition.getRawTransitions(pushDown.getTransitions())));
+            transitionsTable.sort();
         }
     }
 

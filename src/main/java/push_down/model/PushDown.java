@@ -65,7 +65,7 @@ public class PushDown {
      * q1 # Initial State
      * A1 # Initial state of symbol
      * q2 q3 # Set F
-     * q1 a1 A1 q2 A2 # Transition function: δ (q1, a1, A1) = (q2, A2)
+     * q1 a1 A1 q2 A2 # TransitionState function: δ (q1, a1, A1) = (q2, A2)
      *
      * THINK: ignoreComments commentsParser >>> do PushDown <$> takeSets <*> takeAlphabet <*> ... <*> many transitions
      */
@@ -110,9 +110,8 @@ public class PushDown {
 
         Arrays.stream(matcher.group("transitions").split("\n")).forEach((transition) -> {
             String[] args = transition.split(" ");
-            String state                   = args[0];
-
-            // Dollar is the empty language TODO: Should be variable
+            String state                = args[0];
+            // Dollar is the empty char TODO: Should be variable
             Optional<Character> charOpt = args[1].equals("$") ? Optional.empty() : Optional.of(args[1].charAt(0));
             Character popStack          = args[2].charAt(0);
             String toState              = args[3];
@@ -124,20 +123,20 @@ public class PushDown {
 
     /**
      * Return a vector of transitions.
-     * @param transition A Transition
-     * @return next transitions from given transition
+     * @param transitionState A TransitionState
+     * @return next transitions from given transitionState
      */
-    public ArrayList<Transition> epsilonTransitions(Transition transition) throws Exception {
-        ArrayList<Transition> transitionsStack = new ArrayList<>();
+    public ArrayList<TransitionState> epsilonTransitions(TransitionState transitionState) throws Exception {
+        ArrayList<TransitionState> transitionsStack = new ArrayList<>();
 
-        Character topCharStack = transition.getStack().pop().orElseThrow(() -> new Exception("Empty stack to early"));
+        Character topCharStack = transitionState.getStack().pop().orElseThrow(() -> new Exception("Empty stack to early"));
 
-        Optional.ofNullable(getTransitions().apply(transition.getCurrentState(), topCharStack))
+        Optional.ofNullable(getTransitions().apply(transitionState.getCurrentState(), topCharStack))
                 .ifPresent((outputs) ->
                     transitionsStack.addAll(outputs.stream()
                         .map((output) -> {
-                            Stack stack = new Stack(transition.getStack()).push(output.stackItems);
-                            return new Transition(output.state, transition.getTape(), stack);
+                            Stack stack = new Stack(transitionState.getStack()).push(output.stackItems);
+                            return new TransitionState(output.state, transitionState.getTape(), stack);
                         })
                         .collect(Collectors.toCollection(ArrayList::new))));
 
@@ -146,22 +145,22 @@ public class PushDown {
 
     /**
      * TODO:
-     * @param transition
+     * @param transitionState
      * @return
      * @throws Exception
      */
-    public ArrayList<Transition> nonEpsilonTransitions(Transition transition) throws Exception {
-        ArrayList<Transition> transitionsStack = new ArrayList<>();
+    public ArrayList<TransitionState> nonEpsilonTransitions(TransitionState transitionState) throws Exception {
+        ArrayList<TransitionState> transitionsStack = new ArrayList<>();
 
-        Character topCharStack = transition.getStack().pop().orElseThrow(() -> new Exception("Empty stack to early"));
+        Character topCharStack = transitionState.getStack().pop().orElseThrow(() -> new Exception("Empty stack to early"));
 
-        transition.getTape().take().ifPresent((character) ->
-            Optional.ofNullable(getTransitions().apply(transition.getCurrentState(), character, topCharStack))
+        transitionState.getTape().take().ifPresent((character) ->
+            Optional.ofNullable(getTransitions().apply(transitionState.getCurrentState(), character, topCharStack))
                 .ifPresent((outputs) ->
                     transitionsStack.addAll(outputs.stream()
                         .map((output) -> {
-                            Stack stack = new Stack(transition.getStack().push(output.stackItems));
-                            return new Transition(output.state, transition.getTape(), stack);
+                            Stack stack = new Stack(transitionState.getStack().push(output.stackItems));
+                            return new TransitionState(output.state, transitionState.getTape(), stack);
                         })
                         .collect(Collectors.toCollection(ArrayList::new)))));
         return transitionsStack;
@@ -173,22 +172,22 @@ public class PushDown {
      * @return
      */
     public boolean checkString(String text) throws Exception {
-        ArrayList<Transition> transitionsStack = new ArrayList<>();
+        ArrayList<TransitionState> transitionsStack = new ArrayList<>();
 
-        transitionsStack.add(new Transition(getInitialState(), new Tape(text), new Stack(getInitialStackItem())));
+        transitionsStack.add(new TransitionState(getInitialState(), new Tape(text), new Stack(getInitialStackItem())));
 
         boolean belong = false;
 
         while (!transitionsStack.isEmpty() && !belong) {
-            Transition transition = transitionsStack.get(transitionsStack.size() - 1);
+            TransitionState transitionState = transitionsStack.get(transitionsStack.size() - 1);
             transitionsStack.remove(transitionsStack.size() - 1);
 
-            if (belongToLanguage(transition)) {
+            if (belongToLanguage(transitionState)) {
                 belong = true;
             }
-            else if (!transition.getStack().isEmpty()) {
-                transitionsStack.addAll(epsilonTransitions(new Transition(transition)));
-                transitionsStack.addAll(nonEpsilonTransitions(new Transition(transition)));
+            else if (!transitionState.getStack().isEmpty()) {
+                transitionsStack.addAll(epsilonTransitions(new TransitionState(transitionState)));
+                transitionsStack.addAll(nonEpsilonTransitions(new TransitionState(transitionState)));
             }
         }
         return belong;
@@ -196,13 +195,13 @@ public class PushDown {
 
     /**
      * Checks stack, tape and end states. To determine if belong
-     * @param transition
+     * @param transitionState
      * @return
      */
-    private boolean belongToLanguage(Transition transition) {
-        return (transition.getTape().isEmpty() && transition.getStack().isEmpty())
+    private boolean belongToLanguage(TransitionState transitionState) {
+        return (transitionState.getTape().isEmpty() && transitionState.getStack().isEmpty())
                 ||
-                (transition.getTape().isEmpty() && getEndStates().contains(transition.getCurrentState()));
+                (transitionState.getTape().isEmpty() && getEndStates().contains(transitionState.getCurrentState()));
     }
 
     //// Getters and Setters

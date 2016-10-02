@@ -9,6 +9,7 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -56,8 +57,16 @@
             </TableView>
             <TableView fx:id="transitionsTable" layoutX="10.0" layoutY="10.0" prefHeight="331.0" prefWidth="305.0">
                <columns>
-                  <TableColumn editable="false" prefWidth="75.0" sortable="false" text="Nº" />
-                  <TableColumn editable="false" prefWidth="217.0" sortable="false" text="Transition" />
+                  <TableColumn fx:id="numbers" editable="false" prefWidth="75.0" sortable="true" text="Nº">
+                   <cellValueFactory>
+                       <PropertyValueFactory property="numTransition" />
+                   </cellValueFactory>
+                  </TableColumn>
+                  <TableColumn fx:id="transitionColumn" editable="false" prefWidth="217.0" text="Transition">
+                   <cellValueFactory>
+                       <PropertyValueFactory property="transitionStr" />
+                   </cellValueFactory>
+                  </TableColumn>
                </columns>
             </TableView>
          </children></HBox>
