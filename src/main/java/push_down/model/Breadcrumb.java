@@ -6,7 +6,8 @@
 
 package main.java.push_down.model;
 
-import javafx.collections.ObservableList;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 
 import java.util.BitSet;
 
@@ -15,6 +16,8 @@ import java.util.BitSet;
  *
  */
 public class Tracer {
+    private SimpleIntegerProperty fromTransition = new SimpleIntegerProperty(0);
+    private SimpleStringProperty state;
     private TransitionState transitionState;
 
     /**
