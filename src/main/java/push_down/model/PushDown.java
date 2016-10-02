@@ -159,7 +159,7 @@ public class PushDown {
                 .ifPresent(outputs ->
                     transitionsStack.addAll(outputs.stream()
                         .map(output -> {
-                            Stack stack = new Stack(transitionState.getStack().push(output.stackItems));
+                            Stack stack = new Stack(transitionState.getStack()).push(output.stackItems);
                             return new TransitionState(output.state, transitionState.getTape(), stack, output.numTransition);
                         })
                         .collect(Collectors.toCollection(ArrayList::new)))));
