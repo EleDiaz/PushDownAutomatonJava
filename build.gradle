@@ -16,6 +16,12 @@ repositories {
     jcenter()
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'main.java.Main'
+    }
+}
+
 /* dependencies { */
 /*     compile 'org.slf4j:slf4j-api:1.7.13' */
 

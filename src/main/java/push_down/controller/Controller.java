@@ -1,6 +1,6 @@
 /**
  * PushDownAutomaton - Controller.java 1/10/16
- * <p>
+ *
  * Copyright 20XX Eleazar Díaz Delgado. All rights reserved.
  */
 
@@ -23,11 +23,17 @@ import java.util.ResourceBundle;
 
 /**
  * TODO: Commenta algo
+ * TODO: File Format dialog
+ * TODO: About me
+ * TODO: Options
+ * TODO: Step process
+ * TODO: Error no input alphabet not contained in automaton definition
+ * TODO: Highlight End states q*
  *
  */
 public class Controller implements Initializable {
 
-    PushDown pushDown;
+    private PushDown pushDown;
 
     @FXML //  fx:id="checkString"
     private Button checkString;

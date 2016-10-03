@@ -168,6 +168,8 @@ public class PushDown {
 
     /**
      * Check if a string belong a determine push down automaton language
+     * TODO: countTransitions debe tener un limite debido a que pueden haber casos de indeterminismos que lleven
+     *       a que se cuelge el programa
      * @param text
      * @return
      */
