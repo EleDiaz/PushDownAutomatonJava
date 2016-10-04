@@ -12,13 +12,24 @@ import javafx.beans.property.SimpleStringProperty;
 import java.util.BitSet;
 
 /**
- * TODO: Commenta algo
- *
+ * Represent a readable output of trace of execution
  */
 public class Breadcrumb {
+    /**
+     * Number of trace for simple tracking purpose
+     */
     private SimpleIntegerProperty traceN = new SimpleIntegerProperty(0);
+    /**
+     * Number of trace for simple tracking purpose
+     */
     private SimpleStringProperty lastTraceN = new SimpleStringProperty("N/A");
+    /**
+     * Transition used to arrive to current trace for simple tracking purpose
+     */
     private SimpleStringProperty usedTransition = new SimpleStringProperty("N/A");
+    /**
+     * 
+     */
     private SimpleStringProperty state;
     private SimpleStringProperty tape;
     private SimpleStringProperty stack;

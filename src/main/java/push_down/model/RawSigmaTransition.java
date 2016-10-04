@@ -1,6 +1,6 @@
 /**
  * PushDownAutomaton - RawSigmaTransition.java 2/10/16
- * <p>
+ * 
  * Copyright 20XX Eleazar Díaz Delgado. All rights reserved.
  */
 
@@ -13,13 +13,23 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 /**
- * TODO: Commenta algo
+ * Represent a sigma transitions with text format to display into table view.
  *
  */
 public class RawSigmaTransition {
+    /**
+     * Number of transition, correspond to file order
+     */
     private SimpleIntegerProperty numTransition;
+
+    /**
+     * Full transition formated
+     */
     private SimpleStringProperty transitionStr;
 
+    /**
+     * Define the format of each transition.
+     */
     private RawSigmaTransition(int nTransition, String st, Optional<Character> cInput, Character sInput, String toSt, String pStack) {
         numTransition = new SimpleIntegerProperty(nTransition);
         transitionStr = new SimpleStringProperty(
@@ -37,6 +47,11 @@ public class RawSigmaTransition {
         );
     }
 
+    /**
+     * From internal representation of sigma function retrieve each transition to a readable text format
+     * @params funcTransition transitions
+     * @return A collections of each transition
+     */
     static public ArrayList<RawSigmaTransition> getRawTransitions(FuncTransition funcTransition) {
         ArrayList<RawSigmaTransition> result = new ArrayList<>();
 
@@ -59,6 +74,9 @@ public class RawSigmaTransition {
 
         return result;
     }
+
+
+    /// Getters Setters
 
     public int getNumTransition() {
         return numTransition.get();
