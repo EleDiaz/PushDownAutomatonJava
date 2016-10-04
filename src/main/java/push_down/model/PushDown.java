@@ -92,22 +92,33 @@ public class PushDown {
             throw new Exception("Fail to parse file. See the format specified");
         }
 
+        /// States
         Arrays.stream(matcher.group("states").split(" "))
                 .forEach(state -> getStates().add(state));
 
+        /// Tape Alphabet
         Arrays.stream(matcher.group("tAlphabet").split(" "))
                 .forEach(letter -> getTapeAlphabet().add(letter.charAt(0)));
 
+        /// Stack Alphabet
         Arrays.stream(matcher.group("sAlphabet").split(" "))
                 .forEach(letter -> getStackAlphabet().add(letter.charAt(0)));
 
+        /// Initial State
         setInitialState(matcher.group("iState"));
 
+        /// Initial item stack
         setInitialStackItem(matcher.group("iStack").charAt(0));
 
+        /// End states
         Arrays.stream(matcher.group("eStates").split(" "))
-                .forEach(state -> getEndStates().add(state)); // TODO: Checkear que esta contenido en states
+                .forEach(state -> getEndStates().add(state));
 
+        if (!getStates().containsAll(getEndStates())) {
+            throw new Exception("Incoherent automaton. End states isn't contained in states")
+        }
+
+        /// Transitions
         Arrays.stream(matcher.group("transitions").split("\n")).forEach((transition) -> {
             String[] args = transition.split(" ");
             String state                = args[0];
@@ -122,7 +133,7 @@ public class PushDown {
     }
 
     /**
-     * Return a vector of transitions.
+     * Return a vector of transitions without consuming a character.
      * @param transitionState A TransitionState
      * @return next transitions from given transitionState
      */
@@ -144,7 +155,7 @@ public class PushDown {
     }
 
     /**
-     * TODO:
+     * Return a vector of transitions consuming a character.
      * @param transitionState
      * @return
      * @throws Exception

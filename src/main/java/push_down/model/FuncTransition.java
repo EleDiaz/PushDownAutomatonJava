@@ -17,6 +17,9 @@ import java.util.Vector;
  */
 public class FuncTransition {
 
+    /**
+     * Internal representation of transition
+     */
     private HashMap<Input, ArrayList<Output>> transitions = new HashMap<>();
 
     /**
@@ -25,8 +28,8 @@ public class FuncTransition {
     private int countTransitions = 0;
 
     /**
-     * Auxiliary class, It could be more easy if there are t-uples in java
-     * represent the input of "function" sigma
+     * Auxiliary class, It could be more easy if there are t-uples in java.
+     * Represent the input of "function" sigma
      */
     public class Input {
         public String state;
@@ -115,6 +118,8 @@ public class FuncTransition {
                 .orElse(new ArrayList<>());
     }
 
+
+    /// Setters and Getters
 
     private HashMap<Input, ArrayList<Output>> getTransition() {
         return transitions;

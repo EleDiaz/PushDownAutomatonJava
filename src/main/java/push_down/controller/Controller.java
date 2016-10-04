@@ -72,12 +72,16 @@ public class Controller implements Initializable {
         });
     }
 
-
-
+    /**
+     * Close app
+     */
     public void onCloseApp() {
         System.exit(0);
     }
 
+    /**
+     * Dispatch a file dialog to open a .pda files
+     */
     public void onOpenFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose a push down automaton file (.pda)");
@@ -105,6 +109,9 @@ public class Controller implements Initializable {
         }
     }
 
+    /**
+     *
+     */
     public void onCheckString() {
 
         try {

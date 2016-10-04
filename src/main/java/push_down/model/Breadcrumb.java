@@ -28,11 +28,20 @@ public class Breadcrumb {
      */
     private SimpleStringProperty usedTransition = new SimpleStringProperty("N/A");
     /**
-     * 
+     * State
      */
     private SimpleStringProperty state;
+    /**
+     * Tape input
+     */
     private SimpleStringProperty tape;
+    /**
+     * Current stack status
+     */
     private SimpleStringProperty stack;
+    /**
+     * Avialable actions to make from this transition
+     */
     private SimpleStringProperty actions = new SimpleStringProperty();
 
     public Breadcrumb(TransitionState transition, BitSet actions, int traceN, int lastTrace) {
@@ -46,13 +55,12 @@ public class Breadcrumb {
 
         StringBuilder aux = new StringBuilder();
         actions.stream().forEach(idTransition ->
-            // INFO: This code needs a foldl :: Foldable f => (a -> b -> a)       -> a   -> f b    -> a
-            // versus            java reduce ::               (Int -> Int -> Int) -> Int -> BitSet -> Int
-            // (reduce isn't useful, too specific)
             aux.append(idTransition).append(", ")
         );
-        this.actions.set(aux.toString().isEmpty() ? "No there're more transitions": aux.toString()); // TODO: "" -> End way
+        this.actions.set(aux.toString().isEmpty() ? "No there're more transitions": aux.toString());
     }
+
+    /// Getters and Setters, needed for table view
 
     public int getTraceN() {
         return traceN.get();
