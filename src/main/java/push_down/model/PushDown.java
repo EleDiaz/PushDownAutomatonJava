@@ -115,7 +115,7 @@ public class PushDown {
                 .forEach(state -> getEndStates().add(state));
 
         if (!getStates().containsAll(getEndStates())) {
-            throw new Exception("Incoherent automaton. End states isn't contained in states")
+            throw new Exception("Incoherent automaton. End states isn't contained in states");
         }
 
         /// Transitions
