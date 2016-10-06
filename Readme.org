@@ -2,11 +2,9 @@
 
 ** Brief
 
-TODO:
-
-** Internal structure overview
-
-TODO:
+Implementation of [[https://en.wikipedia.org/wiki/Pushdown_automaton][push down automaton]]. Using java with Javafx. It is based in MVC structure.
+This recognise both push down automaton by stack and end states. The format of file is describe into
+the PushDown class. It should have a empty line in the end.
 
 ** User Requirements
 - Java 8 with javafx (ubuntu distributions need install openjfx)
