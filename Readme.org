@@ -15,4 +15,4 @@ the PushDown class. It should have a empty line in the end.
 
 ** Screenshot
 
-[[./screenshots/screenshots.png]]
+[[./screenshots/screenshot.png]]
