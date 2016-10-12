@@ -113,8 +113,9 @@ public class PushDown {
         setInitialStackItem(matcher.group("iStack").charAt(0));
 
         /// End states
-        Arrays.stream(matcher.group("eStates").split(" "))
-                .forEach(state -> getEndStates().add(state));
+        Arrays.stream(matcher.group("eStates").split(" ")) // TIL: With empty input return at least a vector with a empty string
+                .forEach(state -> {
+                    if (!state.isEmpty()) getEndStates().add(state); });
 
         if (!getStates().containsAll(getEndStates())) {
             throw new Exception("Incoherent automaton. End states isn't contained in states");
