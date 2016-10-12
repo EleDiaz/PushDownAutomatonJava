@@ -12,3 +12,7 @@ the PushDown class. It should have a empty line in the end.
 ** Develop Requirements
 - User requirements
 - Gradle tool to build
+
+** Screenshot
+
+[[./screenshots/screenshots.png]]

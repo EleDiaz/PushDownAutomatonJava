@@ -6,7 +6,6 @@
 
 package main.java.push_down.model;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.regex.Matcher;
@@ -20,6 +19,10 @@ import java.util.stream.Collectors;
  * And alphabet it could be very large, therefore its used a string to represent a letter into it.
  */
 public class PushDown {
+    /**
+     * Limit of loop repetition
+     */
+    static public int LIMIT = 100_00;
     /**
      * Transitions, correspond to sigma element in the definition of Push Down Automaton
      */
@@ -67,7 +70,6 @@ public class PushDown {
      * q2 q3 # Set F
      * q1 a1 A1 q2 A2 # TransitionState function: δ (q1, a1, A1) = (q2, A2)
      *
-     * THINK: ignoreComments commentsParser >>> do PushDown <$> takeSets <*> takeAlphabet <*> ... <*> many transitions
      */
     public PushDown(String path) throws Exception {
         Pattern p = Pattern.compile(
@@ -179,12 +181,16 @@ public class PushDown {
 
     /**
      * Check if a string belong a determine push down automaton language
-     * TODO: countTransitions debe tener un limite debido a que pueden haber casos de indeterminismos que lleven
-     *       a que se cuelge el programa
      * @param text
      * @return
      */
     public boolean checkString(String text, ArrayList<Breadcrumb> breadcrumbs) throws Exception {
+        for (char a : text.toCharArray()) {
+            if (!getTapeAlphabet().contains(a)) {
+                throw new Exception("Input not contained into tape alphabet");
+            }
+        }
+
         ArrayList<TransitionState> transitionsStack = new ArrayList<>();
         int countTransitions = 0;
 
@@ -193,11 +199,16 @@ public class PushDown {
         boolean belong = false;
 
         while (!transitionsStack.isEmpty() && !belong) {
+            if (countTransitions == LIMIT) {
+                throw new Exception("Exceed limit of processing");
+            }
+
             TransitionState transitionState = transitionsStack.get(transitionsStack.size() - 1);
             transitionsStack.remove(transitionsStack.size() - 1);
 
             if (belongToLanguage(transitionState)) {
                 belong = true;
+                // Last trace
                 breadcrumbs.add(new Breadcrumb(transitionState, new BitSet(), countTransitions++, 0));
             }
             else if (!transitionState.getStack().isEmpty()) {
@@ -207,6 +218,8 @@ public class PushDown {
 
                 BitSet actions = new BitSet();
                 aux.forEach(transition -> actions.set(transition.getIdTransition().get()));
+
+                // Trace
                 breadcrumbs.add(new Breadcrumb(
                       transitionState
                     , actions

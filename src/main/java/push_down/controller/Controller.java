@@ -22,14 +22,7 @@ import java.util.Comparator;
 import java.util.ResourceBundle;
 
 /**
- * TODO: Commenta algo
- * TODO: File Format dialog
- * TODO: About me
- * TODO: Options
- * TODO: Step process
- * TODO: Error no input alphabet not contained in automaton definition
  * TODO: Highlight End states q*
- *
  */
 public class Controller implements Initializable {
 
@@ -37,12 +30,6 @@ public class Controller implements Initializable {
 
     @FXML //  fx:id="checkString"
     private Button checkString;
-
-    @FXML //  fx:id="step"
-    private Button step;
-
-    @FXML //  fx:id="reset"
-    private Button reset;
 
     @FXML //  fx:id="tapeInput"
     private TextField tapeInput;
@@ -59,11 +46,10 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert checkString != null : "fx:id=\"checkString\" was not injected: check your FXML file 'Main.fxml'.";
-        assert step != null : "fx:id=\"step\" was not injected: check your FXML file 'Main.fxml'.";
-        assert reset != null : "fx:id=\"reset\" was not injected: check your FXML file 'Main.fxml'.";
         assert tapeInput != null : "fx:id=\"tapeInput\" was not injected: check your FXML file 'Main.fxml'.";
         assert transitionsTable != null : "fx:id=\"transitionTable\" was not injected: check your FXML file 'Main.fxml'.";
 
+        // Set order of display trace
         transitionsTable.sortPolicyProperty().set(t -> {
             Comparator<RawSigmaTransition> comparator = (r1, r2) ->
                 new Integer(r1.getNumTransition()).compareTo(r2.getNumTransition());
@@ -89,20 +75,13 @@ public class Controller implements Initializable {
             new FileChooser.ExtensionFilter("Push down Files", "*.pda"),
             new FileChooser.ExtensionFilter("All Files", "*.*"));
 
-        File selectedFile = fileChooser.showOpenDialog(reset.getScene().getWindow());
+        File selectedFile = fileChooser.showOpenDialog(checkString.getScene().getWindow());
         if (selectedFile != null) {
             try {
                 pushDown = new PushDown(selectedFile.toString());
                 infoLabel.setText("Loaded a push down file");
             } catch (Exception e) {
-                e.getMessage();
-                // TODO: Abstract this part to other class, it is necessary in other interactions
-                Dialog<ButtonType> dialog = new Dialog<>();
-                dialog.getDialogPane().getButtonTypes().add(new ButtonType("Got it!", ButtonBar.ButtonData.CANCEL_CLOSE));
-                dialog.setTitle("An Error happened");
-                dialog.setHeaderText("File error");
-                dialog.setContentText(e.getMessage());
-                dialog.showAndWait();
+                showErrorDialog(e.getMessage());
             }
             transitionsTable.setItems(FXCollections.observableArrayList(RawSigmaTransition.getRawTransitions(pushDown.getTransitions())));
             transitionsTable.sort();
@@ -110,7 +89,7 @@ public class Controller implements Initializable {
     }
 
     /**
-     *
+     * Check the string
      */
     public void onCheckString() {
 
@@ -120,8 +99,20 @@ public class Controller implements Initializable {
             infoLabel.setText(test? "Input belong to language" : "Not belong");
             traceTable.setItems(FXCollections.observableArrayList(trace));
         } catch (Exception e) {
-            e.printStackTrace();
+            showErrorDialog(e.getMessage());
         }
 
+    }
+
+    /**
+     * Show a error dialog with specified text
+     */
+    private void showErrorDialog(String error) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.getDialogPane().getButtonTypes().add(new ButtonType("Got it!", ButtonBar.ButtonData.CANCEL_CLOSE));
+        dialog.setTitle("An Error happened");
+        dialog.setHeaderText("File error");
+        dialog.setContentText(error);
+        dialog.showAndWait();
     }
 }
